@@ -4,13 +4,13 @@ var page = '';
 var id;
 var nextId = 10006;
 var btnModifica = "<button class='btn btn-primary ms-5 modifica' data-bs-toggle='modal' data-bs-target='#modal-modify'>Modifica</button>";
-var btnElimina = "<button class='btn btn-danger' id='elimina'>Elimina</button>";
+var btnElimina = "<button class='btn btn-danger elimina'>Elimina</button>";
 
 //funzione
-function chiamata(url){
+function chiamata(url) {
     $.ajax({
-        url : url,
-        dataType : 'json', //restituisce un oggetto JSON
+        url: url,
+        dataType: 'json', //restituisce un oggetto JSON
         success: function (responseData) {
             console.log(responseData);
             response = responseData;
@@ -19,14 +19,14 @@ function chiamata(url){
             if (page == 0) {
                 $('#Prev').hide();
                 $('#first').hide();
-            }else{
+            } else {
                 $('#Prev').show();
                 $('#first').show();
             }
             if (url == response["_links"]["last"]["href"]) {
                 $('#last').hide();
                 $('#succ').hide();
-            }else{
+            } else {
                 $('#last').show();
                 $('#succ').show();
             }
@@ -35,20 +35,6 @@ function chiamata(url){
         }
     });
 }
-
-$("#elimina").click(function () { 
-    e.preventDefault();
-    console.log("ciao");
-    id = $(this).parent().data("id");
-    $.ajax({
-        url : link + "/" + id,
-        type : DELETE,
-        success : function () {
-            chiamata(url);
-        },
-    });
-});
-
 
 //una volta che la pagina viene caricata, vengono inseriti gli elementi nella tabella
 $(document).ready(
@@ -106,6 +92,23 @@ function displayTable(data) {
     //         }
     //     }
     // });
+    $(".elimina").click(function () {
+
+        console.log(link);
+        id = $(this).parent().data("id");
+        console.log(id);
+        $.ajax({
+            type: "DELETE",
+            url: link + "/" + id,
+            success: function () {
+                console.log(link + "?page=" + page);
+                $.get(link + "?page=" + page, function (response) {
+                    chiamata(response["_embedded"]["employees"]);
+                },
+                )
+            }
+        });
+    });
 }
 
 $("#aggiungi").click(function () {
