@@ -2,7 +2,7 @@ var response = null;
 var link = 'http://localhost:8080/employees';
 var page = '';
 var id;
-var nextId = 10006;
+var nextId = 500021;
 var btnModifica = "<button class='btn btn-primary ms-5 modifica' data-bs-toggle='modal' data-bs-target='#modal-modify'>Modifica</button>";
 var btnElimina = "<button class='btn btn-danger elimina'>Elimina</button>";
 
@@ -59,53 +59,18 @@ function displayTable(data) {
 
     $(".modifica").click(function () {
         id = $(this).parent().data("id");
-
-        for (var i = 0; i < data.length; i++) {
-            if (id == data[i].id) {
-                $("#nome-m").val(data[i].firstName);
-                $("#cognome-m").val(data[i].lastName);
-            }
-        }
     });
 
-    $("#modifica").click(function () {
-        var nome = $("#nome-m").val();
-        var cognome = $("#cognome-m").val();
 
-        for (var i = 0; i < data.length; i++) {
-            if (id == data[i].id) {
-                data[i].firstName = nome;
-                data[i].lastName = cognome;
-            }
-        }
-        displayTable();
-    });
 
-    // $(".elimina").click(function () {
-    //     $(this).parents("tr").fadeOut("fast");
-
-    //     var id = $(this).parent().data("id");
-
-    //     for (var i = 0; i < data.length; i++) {
-    //         if (id == data[i].id) {
-    //             data.splice(i, 1);
-    //         }
-    //     }
-    // });
     $(".elimina").click(function () {
-
-        console.log(link);
         id = $(this).parent().data("id");
-        console.log(id);
         $.ajax({
             type: "DELETE",
             url: link + "/" + id,
             success: function () {
-                console.log(link + "?page=" + page);
-                $.get(link + "?page=" + page, function (response) {
-                    chiamata(response["_embedded"]["employees"]);
-                },
-                )
+                console.log(response);
+                chiamata(link + "?page=" + page);
             }
         });
     });
@@ -118,22 +83,50 @@ $("#aggiungi").click(function () {
     $("#nome").val("");
     $("#cognome").val("");
 
-    //creo un nuovo oggetto
-    var dipendente = {
-        "id": nextId,
-        "birthDate": "",
-        "firstName": nome,
-        "lastName": cognome,
-        "gender": "",
-        "hireDate": "",
-    }
 
-    //pusho il nuovo oggetto nell'array data
-    data.push(dipendente);
+    $.ajax({
+        type: "POST",
+        url: link,
 
-    nextId++;
+        data: JSON.stringify({
+            birthDate: "",
+            firstName: nome,
+            gender: "M",
+            hireDate: "",
+            lastName: cognome
+        }),
 
-    displayTable();
+        contentType: "application/json",
+        dataType: 'json',
+
+        success: function () {
+            nextId++;
+            var last = response["_links"]["last"]["href"];
+            chiamata(last);
+        }
+    });
+});
+
+$("#modifica").click(function () {
+    console.log(this);
+
+    var nome = $("#nome-m").val();
+    var cognome = $("#cognome-m").val();
+
+    $.ajax({
+        type: "PATCH",
+        url: "http://localhost:8080/employees/" + id,
+        data: JSON.stringify({
+            firstName: nome,
+            lastName: cognome
+        }),
+        dataType: "json",
+        contentType: "application/json",
+        success: function () {
+            chiamata(link);
+        }
+    });
+
 });
 
 //bottone per pagina avanti
